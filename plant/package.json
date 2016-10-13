@@ -1,0 +1,19 @@
+{
+  "name": "86DuinoPlant",
+  "version": "0.0.0",
+  "description": "86DuinoPlant",
+  "main": "app.js",
+  "author": {
+    "name": "Sayter",
+    "email": ""
+  },
+  "dependencies": {
+    "chart.js": "^2.1.3",
+    "d3": "*",
+    "express": "3.4.4",
+    "jade": "*",
+    "mraa": "0.9.0-21-ga2cfbe1",
+    "socket.io": "^1.4.5",
+    "stylus": "*"
+  }
+}

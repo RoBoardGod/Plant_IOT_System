@@ -1,0 +1,42 @@
+extends layout
+
+block content
+ br
+ h1 #{title}
+ h3 86Duino settings
+ p
+ form(name='my_form', method='POST', target='')
+  | Name :
+  input(type='text', name='name')
+  p
+  | E-mail :
+  input(type='text', name='email', style='width:200px')
+  p
+  | Mode :
+  br
+  input(type='radio', name='mode', value='0')
+  | Warning mode
+  input(type='radio', name='mode', value='1')
+  | Watering mode
+  p
+  | humidity limit :
+  input(type='text', name='humidity', style='width:40px') 
+  | %
+  p
+  | Highest water level :
+  input(type='text', name='MaxCistern', style='width:40px') 
+  | cm
+  p
+  | Minimum water level :
+  input(type='text', name='minCistern', style='width:40px') 
+  | cm
+  p
+  script(src='https://cdn.socket.io/socket.io-1.2.1.js')
+  input(type='button', value='submit', onclick="Set_Settings(this.form)")
+  script.
+   var socket = io.connect();
+   socket.emit('Get_Settings');
+   socket.on('Get_Settings_reply', function(data){
+    Get_Settings_reply(data);
+   });
+

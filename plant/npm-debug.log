@@ -1,0 +1,82 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/local/bin/node',
+1 verbose cli   '/usr/local/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   'microsecond' ]
+2 info using npm@1.4.29
+3 info using node@v0.10.42
+4 warn deprecated This version of npm lacks support for important features,
+5 warn deprecated such as scoped packages, offered by the primary npm
+6 warn deprecated registry. Consider upgrading to at least npm@2, if not the
+7 warn deprecated latest stable version. To upgrade to npm@2, run:
+8 warn deprecated npm -g install npm@latest-2
+9 warn deprecated To upgrade to the latest stable version, run:
+10 warn deprecated npm -g install npm@latest
+11 warn deprecated (Depending on how Node.js was installed on your system, you
+12 warn deprecated may need to prefix the preceding commands with `sudo`, or if
+13 warn deprecated on Windows, run them from an Administrator prompt.)
+14 warn deprecated If you're running the version of npm bundled with
+15 warn deprecated Node.js 0.10 LTS, be aware that the next version of 0.10 LTS
+16 warn deprecated will be bundled with a version of npm@2, which has some small
+17 warn deprecated backwards-incompatible changes made to `npm run-script` and
+18 warn deprecated semver behavior.
+19 warn package.json 86DuinoPlant@0.0.0 No repository field.
+20 warn package.json mraa@v0.9.0-21-ga2cfbe1 No repository field.
+21 warn package.json mraa@v0.9.0-21-ga2cfbe1 No README data
+22 verbose readDependencies using package.json deps
+23 verbose cache add [ 'microsecond', null ]
+24 verbose cache add name=undefined spec="microsecond" args=["microsecond",null]
+25 verbose parsed url { protocol: null,
+25 verbose parsed url   slashes: null,
+25 verbose parsed url   auth: null,
+25 verbose parsed url   host: null,
+25 verbose parsed url   port: null,
+25 verbose parsed url   hostname: null,
+25 verbose parsed url   hash: null,
+25 verbose parsed url   search: null,
+25 verbose parsed url   query: null,
+25 verbose parsed url   pathname: 'microsecond',
+25 verbose parsed url   path: 'microsecond',
+25 verbose parsed url   href: 'microsecond' }
+26 silly lockFile a7171851-microsecond microsecond
+27 verbose lock microsecond /home/dmp/.npm/a7171851-microsecond.lock
+28 silly lockFile a7171851-microsecond microsecond
+29 silly lockFile a7171851-microsecond microsecond
+30 verbose addNamed [ 'microsecond', '' ]
+31 verbose addNamed [ null, '*' ]
+32 silly lockFile 2a46ef18-microsecond microsecond@
+33 verbose lock microsecond@ /home/dmp/.npm/2a46ef18-microsecond.lock
+34 silly addNameRange { name: 'microsecond', range: '*', hasData: false }
+35 verbose request where is /microsecond
+36 verbose request registry https://registry.npmjs.org/
+37 verbose request id 370f45ad63ec46a8
+38 verbose url raw /microsecond
+39 verbose url resolving [ 'https://registry.npmjs.org/', './microsecond' ]
+40 verbose url resolved https://registry.npmjs.org/microsecond
+41 verbose request where is https://registry.npmjs.org/microsecond
+42 info trying registry request attempt 1 at 15:21:27
+43 http GET https://registry.npmjs.org/microsecond
+44 info retry will retry, error on last attempt: Error: getaddrinfo ENOTFOUND
+45 info trying registry request attempt 2 at 15:21:38
+46 http GET https://registry.npmjs.org/microsecond
+47 info retry will retry, error on last attempt: Error: getaddrinfo ENOTFOUND
+48 info trying registry request attempt 3 at 15:22:38
+49 http GET https://registry.npmjs.org/microsecond
+50 silly lockFile 2a46ef18-microsecond microsecond@
+51 silly lockFile 2a46ef18-microsecond microsecond@
+52 error network getaddrinfo ENOTFOUND
+52 error network This is most likely not a problem with npm itself
+52 error network and is related to network connectivity.
+52 error network In most cases you are behind a proxy or have bad network settings.
+52 error network
+52 error network If you are behind a proxy, please make sure that the
+52 error network 'proxy' config is set properly.  See: 'npm help config'
+53 error System Linux 3.4.6
+54 error command "/usr/local/bin/node" "/usr/local/bin/npm" "install" "microsecond"
+55 error cwd /home/dmp/plant
+56 error node -v v0.10.42
+57 error npm -v 1.4.29
+58 error syscall getaddrinfo
+59 error code ENOTFOUND
+60 error errno ENOTFOUND
+61 verbose exit [ 1, true ]
