@@ -11,10 +11,13 @@ My blog: http://roboardgod.blogspot.tw/
 ##I. File list
 -------------
 	1. \plant
-		+ We use MRAA to convert C / C ++ functions into JavaScript.
-		So we build a webside on 86duino, you can see all values (humidity, water quantity, temperature...etc) and live camera to take care your plant on this webside.
+		We use MRAA to convert C / C ++ functions into JavaScript.
+		So we build a webside on 86duino, you can see all values (humidity, water quantity, temperature...etc.)
+		and live camera to take care your plant on this webside.
+		
 	2. \UI_display
-		+ The UI used SDL to draw graphical interface, then usb display will show all values.
+		The UI used SDL to draw graphical interface, then usb display will show all values.
+		
 <br>
 <br>
 <br>
