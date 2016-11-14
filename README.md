@@ -1,7 +1,7 @@
 # 86duino plant IOT system - ZaiBo
 <br>
 ZaiBo 是一個在 86Duino Zeo上使用 L86duntu作業系統的工具程式，使用 USB WiFi 網卡做一個IOT系統。
-![](https://www.youtube.com/watch?v=LVtBhEpdLYw)
+[簡介影片](https://www.youtube.com/watch?v=LVtBhEpdLYw)
 
 ZaiBo除了把原始碼公開以外，也將[建構教學](http://roboardgod.blogspot.tw/2016/11/86duino-iot-zaibo_14.html)也一併公開，任何人都可以自由使用、修改、散佈。
 <br>
@@ -18,7 +18,8 @@ ZaiBo除了把原始碼公開以外，也將[建構教學](http://roboardgod.blogspot.tw/2016/11/
 		這個UI_display是使用SDL來繪製圖形介面，提供觸控功能、自動澆水並且有遠端監控等功能。
 		
 	2. \l86duntu\home\dmp\TFT_display
-		這個TFT_display是精簡版，精簡版雖然沒有自動澆水功能，但它可以提醒使用者澆水，並且採用TFT LCD做為簡易的螢幕，而網站功能皆相同。
+		這個TFT_display是精簡版，精簡版雖然沒有自動澆水功能，但它可以提醒使用者澆水，
+		並且採用TFT LCD做為簡易的螢幕，而網站功能皆相同。
 		
 	3. \l86duntu\home\dmp\plant
 		我們使用了MRAA來轉換C/C++的函式到JavaScript。
