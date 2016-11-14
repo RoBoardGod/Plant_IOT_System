@@ -40,17 +40,17 @@ In addition to the original code, ZaiBo will also open the [teaching of construc
 		
 	3. \l86duntu\home\dmp\plant
 		我們使用了MRAA來轉換C/C++的函式到JavaScript。
-		我們也建立了一個網站在L86duntu上，你可以在上面看到所有的數值(例如：濕度、水量、溫度...等)，
+		我們也建立了一個網站在L86duintu上，你可以在上面看到所有的數值(例如：濕度、水量、溫度...等)，
 		也有即時網路攝影機來讓你隨時觀看並照顧你的盆栽。
 		We used MRAA to convert C / C ++ functions to JavaScript.
-		We have also created a website on L86duntu where you can see all the values (eg humidity, water, 
+		We have also created a website on L86duintu where you can see all the values (eg humidity, water, 
 		temperature ...)
 		There are also instant webcams that let you watch and take care of your potted plants at any time.
 		
 	4. \l86duntu\etc\init.d\plant
 		這個script可以讓我們在開機時自動啟動所有程式，並且有自動辨別的功能，詳情可以看我部落格中的介紹。
-		This script allows us to start automatically when the boot all the programs, and automatic 
-		identification function, the details can see my blog in the introduction.
+		This script allows us to start automatically when the boot all the programs, and automatic identification
+		function, the details can see my blog in the introduction.
 		
 <br>
 <br>
