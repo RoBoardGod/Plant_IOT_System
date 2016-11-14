@@ -1,0 +1,6 @@
+[2008-08-22 16:03:05] [connect] Successful connection
+[2008-08-22 16:03:05] [connect] WebSocket Connection 127.0.0.1:3000 v-2 "WebSocket++/0.5.1" /socket.io/?EIO=4&transport=websocket&t=1219392185 101
+[2008-08-22 16:43:36] [connect] Successful connection
+[2008-08-22 16:43:36] [connect] WebSocket Connection 127.0.0.1:3000 v-2 "WebSocket++/0.5.1" /socket.io/?EIO=4&transport=websocket&t=1219394616 101
+[2016-11-03 16:54:35] [connect] Successful connection
+[2016-11-03 16:54:36] [connect] WebSocket Connection 127.0.0.1:3000 v-2 "WebSocket++/0.5.1" /socket.io/?EIO=4&transport=websocket&t=1478163275 101
