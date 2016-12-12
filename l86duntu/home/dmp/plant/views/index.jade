@@ -21,9 +21,12 @@ block content
       p Temperature
       .progress.progress-striped.active
         .progress-bar.progress-bar-danger(role="progressbar", aria-valuenow="0", aria-valuemin="0", aria-valuemax="100", style="width: 0%", id = "temperature")
-      p Atmospheric pressure 
+      p Atmospheric pressure
       .progress.progress-striped.active
-        .progress-bar.progress-bar-danger(role="progressbar", aria-valuenow="0", aria-valuemin="0", aria-valuemax="100", style="width: 0%", id = "atmospheric-pressure")
+        .progress-bar.progress-bar-success(role="progressbar", aria-valuenow="0", aria-valuemin="0", aria-valuemax="100", style="width: 0%", id = "atmospheric-pressure")
+      p Altitude height 
+      .progress.progress-striped.active
+        .progress-bar.progress-bar-info(role="progressbar", aria-valuenow="0", aria-valuemin="0", aria-valuemax="100", style="width: 0%", id = "Altitude")
       script(src='https://cdn.socket.io/socket.io-1.2.1.js')
       p
         a.btn.btn-default(onmousedown='water();' , onmouseup='stopwater();') Water

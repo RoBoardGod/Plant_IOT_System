@@ -15,9 +15,9 @@ block content
   | Mode :
   br
   input(type='radio', name='mode', value='0')
-  | Warning mode
+  | Warning mode  
   input(type='radio', name='mode', value='1')
-  | Watering mode
+  | Watering mode  
   p
   | humidity limit :
   input(type='text', name='humidity', style='width:40px') 
@@ -30,6 +30,21 @@ block content
   | Minimum water level :
   input(type='text', name='minCistern', style='width:40px') 
   | cm
+  p
+  br
+  p
+  | WIFI Protocol:
+  br
+  input(type='radio', name='Protocol', value='WEP')
+  | WEP
+  input(type='radio', name='Protocol', value='WPA')
+  | WPA
+  p
+  | WIFI ssid :
+  input(type='text', name='ssid', style='width:100px') 
+  p
+  | WIFI key :
+  input(type="password", name='key', style='width:100px') 
   p
   script(src='https://cdn.socket.io/socket.io-1.2.1.js')
   input(type='button', value='submit', onclick="Set_Settings(this.form)")

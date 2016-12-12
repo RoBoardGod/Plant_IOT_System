@@ -79,6 +79,24 @@ var record_addr = "/home/dmp/plant/record.json";
 var settings_addr = "/home/dmp/plant/settings.json";
 var settings = require(settings_addr);
 
+//debug led
+
+var led0 = new m.Gpio(8); 
+var led1 = new m.Gpio(9); 
+var led2 = new m.Gpio(10); 
+led0.dir(m.DIR_OUT);
+led1.dir(m.DIR_OUT);
+led2.dir(m.DIR_OUT);
+var ledState0 = true;
+var ledState1 = true;
+var ledState2 = true;
+function periodicActivity()
+{
+  led0.write(ledState0?1:0);
+  ledState0 = !ledState0;
+  setTimeout(periodicActivity,1000);
+}
+periodicActivity();
 
 var transporter = nodemailer.createTransport({
     host: 'localhost',
@@ -103,14 +121,13 @@ if(settings.addresses != addresses[addresses.length-1]){
 	settings.addresses = addresses[addresses.length-1];
 	var fs = require('fs');
 	fs.writeFile(settings_addr, JSON.stringify(settings));
-	console.log('IP changed: ' + settings.addresses);
 	var getIP_mailOptions = {
 		sender: '86planter@86duino.com',
 		to: settings.email,
-		subject: '來自86Duino盆栽的通知',
+		subject: '來自 ' + settings.name + ' 的IP更換通知',
 
-		text: '親愛的 ' + settings.name + ' :\n'
-			+ '主人您好,\n'
+		text: '親愛的主人您好 :\n'
+			+ '我是' + settings.name + ',\n'
 			+ '我的IP因為某些原因被換掉了！\n'
 			+ '現在的網址為: http://' + settings.addresses + ':3000\n'
 			+ '有空可以來關心我唷！'
@@ -176,6 +193,8 @@ function checkCistern(){
 	var v = (settings.MaxCistern - t[1] / 58200)*100/settings.MaxCistern;
 	if( v >= 0 )
 		outputval[0] = Math.round((outputval[0] + v)/2); // 58200 = 1000 * 2 * 29.1
+	else
+		outputval[0] = 0;
 	
 }
   
@@ -185,33 +204,39 @@ setInterval(function checkState() {
 	v =humidity.readFloat()*100;
 	if( v >= 0 )
 		outputval[1] = Math.round((outputval[1] + v)/2);
-	
-	rm_g185.address(0x40);	//SHT21
-    d = rm_g185.readBytesReg(0xE5, 3);	//etHumidity
-	v = -6.0 + 125.0 / 65536.0 * ((d[0] * 256) + d[1]);
-	if( v >= 0 )
-		outputval[2] = Math.round((outputval[2] + v)/2);
+	else
+		outputval[1] = 0;
 
 	rm_g185.address(0x40);	//SHT21
-    d = rm_g185.readBytesReg(0xE3, 3);	//GetTemperature
+	d = rm_g185.readBytesReg(0xE5, 3);	//etHumidity
+	v = -6.0 + 125.0 / 65536.0 * ((d[0] * 256) + d[1]);
+	if( v >= 0  && v <= 100)
+		outputval[2] = Math.round((outputval[2] + v)/2);
+	else
+		outputval[2] = 0;
+
+	rm_g185.address(0x40);	//SHT21
+	d = rm_g185.readBytesReg(0xE3, 3);	//GetTemperature
 	v = -46.85 + 175.72 / 65536.0 * ((d[0] * 256) + d[1]);
-	if( v >= 0 )
+	if( v >= 0 && v <= 100)
 		outputval[3] = Math.round((outputval[3] + v)/2);
+	else
+		outputval[3] = 0;
 	
 	
 	rm_g185.address(0x5D);	//LPS331
 	rm_g185.writeReg(0x20,0xE0);	//init
 	rm_g185.address(0x5D);	//LPS331
-    d = rm_g185.readBytesReg(0xA8, 3);
-	v = Math.round((d[2] * 65536 + d[1] * 256 + d[0]) / 4096);
-	if( v >= 0 )
-		outputval[4] = Math.round((outputval[4] + v)/2);
+	d = rm_g185.readBytesReg(0xA8, 3);
+	v = (d[2] * 65536 + d[1] * 256 + d[0]) / 4096;
+	if( v >= 0 && v <= 2000)
+		outputval[4] = (outputval[4] + v) / 2;
+	else
+		outputval[4] = 0;
 	
-	
-	
-	
-	for(var i = 0; i < 5; i++)
+	for(var i = 0; i < 5; i++){
 		array[i].push(outputval[i]);
+	}
     buf_count ++;
     if(buf_count > 7200)
 	{
@@ -239,10 +264,11 @@ setInterval(function checkState() {
 			var Warning_mailOptions = {
 				sender: '86planter@86duino.com',
 				to: settings.email,
-				subject: '來自86Duino盆栽的求救信',
+				subject: '來自 ' + settings.name + ' 的求救信',
 
-				text: '親愛的 ' + settings.name + ' :\n'
-					+ '主人救救我! 我口渴了,\n'
+				text: '親愛的主人您好 :\n'
+					+ '我是' + settings.name + ',\n'
+					+ '拜託救救我! 我口渴了,\n'
 					+ '請抽空來幫我澆水，拜託了！\n'
 					+ '現在的土壤濕度為 ' + outputval[1] + '%，\n'
 					+ '已經低於'+ settings.humidity +'%了。'
@@ -263,10 +289,11 @@ setInterval(function checkState() {
 			var Watering_mailOptions = {
 				sender: '86planter@86duino.com',
 				to: settings.email,
-				subject: '來自86Duino盆栽的求救信',
+				subject: '來自 ' + settings.name + ' 的求救信',
 
-				text: '親愛的 ' + settings.name + ' :\n'
-					+ '主人救救我! 水桶沒水了,\n'
+				text: '親愛的主人您好 :\n'
+					+ '我是' + settings.name + ',\n'
+					+ '拜託救救我! 水桶沒水了,\n'
 					+ '請抽空來幫我補充水桶的水，拜託了！\n'
 					+ '現在的水桶水量為 ' + outputval[0] + '%，\n'
 					+ '已經低於'+ (settings.minCistern/settings.MaxCistern*100) +'%了。'
@@ -299,9 +326,69 @@ setInterval(function checkState() {
 		
 }, 1000);
 
+function run_cmd(cmd, args, cb, end) {
+    var spawn = require('child_process').spawn,
+        child = spawn(cmd, args),
+        me = this;
+    child.stdout.on('data', function (buffer) { cb(me, buffer) });
+    child.stdout.on('end', end);
+}
+setInterval(function checkConnect() {
+	
+	led2.write(ledState2?1:0);
+	ledState2 = !ledState2;
+	
+	var foo = new run_cmd(
+    'bash', ['/home/dmp/plant/checkWIFI'],
+    function (me, buffer) { me.stdout += buffer.toString() },
+    function () { console.log(foo.stdout) }
+	);
+	
+	var os = require('os');
+	var interfaces = os.networkInterfaces();
+	var addresses = [];
+	for (var k in interfaces) {
+		for (var k2 in interfaces[k]) {
+			var address = interfaces[k][k2];
+			if (address.family === 'IPv4' && !address.internal) {
+				addresses.push(address.address);
+			}
+		}
+	}
+	if(settings.addresses != addresses[addresses.length-1] && addresses[addresses.length-1] != '10.0.1.1'){
+		settings.addresses = addresses[addresses.length-1];
+		var fs = require('fs');
+		fs.writeFile(settings_addr, JSON.stringify(settings));
+		var getIP_mailOptions = {
+			sender: '86planter@86duino.com',
+			to: settings.email,
+			subject: '來自 ' + settings.name + ' 的IP更換通知',
+
+			text: '親愛的主人您好 :\n'
+				+ '我是' + settings.name + ',\n'
+				+ '我的IP因為某些原因被換掉了！\n'
+				+ '現在的網址為: http://' + settings.addresses + ':3000\n'
+				+ '有空可以來關心我唷！'
+				+ '\n\n'
+				+ '來自你可愛的盆栽'
+		};
+		transporter.sendMail(getIP_mailOptions, function(err, info){
+			if(err)
+				console.log(err);
+			else
+				console.log(info);
+		});
+		
+		led1.write(1);
+	}else{
+		led0.write(0);
+	}
+}, 30000);
+
 serv_io.sockets.on('connection', function (socket) {
     setInterval(function () {
         socket.emit('update', {
+            'mode': parseInt(settings.mode),
             'Remaining': outputval[0],
             'Humidity': outputval[1],
             'etHumidity': outputval[2],
@@ -336,6 +423,9 @@ serv_io.sockets.on('connection', function (socket) {
         console.log('Set humidity: ' + obj.humidity);
         console.log('Set MaxCistern: ' + obj.MaxCistern);
         console.log('Set minCistern: ' + obj.minCistern);
+        console.log('Set Protocol: ' + obj.Protocol);
+        console.log('Set ssid: ' + obj.ssid);
+        console.log('Set key: ' + obj.key);
 		
 		settings.name = obj.name;
 		settings.email = obj.email;
@@ -346,24 +436,33 @@ serv_io.sockets.on('connection', function (socket) {
 			settings.MaxCistern = obj.MaxCistern;
 		if(!isNaN(obj.minCistern))
 			settings.minCistern = obj.minCistern;
+		settings.Protocol = obj.Protocol;
+		settings.ssid = obj.ssid;
+		settings.key = obj.key;
 
 		
 		var fs = require('fs');
 		fs.writeFile(settings_addr, JSON.stringify(settings));
-		
-		var reply_mailOptions = {
-			sender: '86planter@86duino.com',
-			to: settings.email,
-			subject: '來自86Duino盆栽的通知',
+		if(obj.mode == 0){	//Warning mode
+			var reply_mailOptions = {
+				sender: '86planter@86duino.com',
+				to: settings.email,
+				subject: '來自 ' + settings.name + ' 的設定更改通知',
 
-			text: '親愛的 ' + settings.name + ' :\n'
-				+ '主人您好,\n'
-				+ '您的設定已經更改！\n'
-				+ '濕度設定在 ' + settings.humidity + "% 以下時澆水。"
-				+ '現在的網址為: http://' + settings.addresses + ':3000\n'
-				+ '\n\n'
-				+ '來自你可愛的盆栽'
-		};
+				text: '親愛的主人您好 :\n'
+					+ '我是' + settings.name + ',\n'
+					+ '您的設定已經更改！\n'
+					+ '濕度設定在 ' + settings.humidity + '% 以下時通知您。\n'
+					+ 'wifi設定為' + obj.Protocol + '協定，\n'
+					+ '並將連線到' + obj.ssid + '，密碼為' + obj.key + '，\n'
+					+ '建議您重開機，設定將會被正確的執行。\n'
+					+ '現在的網址為: http://' + settings.addresses + ':3000\n'
+					+ '\n\n'
+					+ '來自你可愛的盆栽'
+			};			
+		}else{
+			
+		}
 		transporter.sendMail(reply_mailOptions, function(err, info){
 			if(err)
 				console.log(err);
@@ -375,9 +474,12 @@ serv_io.sockets.on('connection', function (socket) {
         console.log('Reply name: ' + settings.name);
         console.log('Reply email: ' + settings.email);
         console.log('Reply mode: ' + settings.mode);
-        console.log('Reply mode: ' + settings.humidity);
-        console.log('Reply mode: ' + settings.MaxCistern);
-        console.log('Reply mode: ' + settings.minCistern);
+        console.log('Reply humidity: ' + settings.humidity);
+        console.log('Reply MaxCistern: ' + settings.MaxCistern);
+        console.log('Reply minCistern: ' + settings.minCistern);
+        console.log('Reply Protocol: ' + settings.Protocol);
+        console.log('Reply ssid: ' + settings.ssid);
+        console.log('Reply key: ' + settings.key);
         socket.emit('Get_Settings_reply',settings);
     });
 });

@@ -18,23 +18,18 @@
 #include "sio_client.h"
 #include "sio_message.h"
 #include "sio_socket.h"
-/*
-#include <TFT.h>
-#include <SPI.h>
-#define cs   10
-#define dc   9
-#define rst  8
-int TFT_val[4] = {0};
-int TFT_rval[4] = {0};
-char* TFT_name[4] = {"Humidity: ", "Air Humidity: ", "Temperature: ", "Pressure: "};
-char* TFT_unit[4] = {"%", "%RH", "C", "mbar"};
 
-*/
+
+
 short keyshift_x = 0,keyshift_y = 0;
 
 float ad[5];
+float ad_show[5];
 int ad_pins_map[5] = {1,0,3,2,4};
 int ad_magnification[5] = {100,100,100,100,1000};
+float ad_max[5] = {100,100,40,100,1500};
+float ad_min[5] = {0,0,0,0,500};
+
 SDL_Surface *ad_msg = NULL;
 
 const int SCREEN_WIDTH = 320;
@@ -67,7 +62,8 @@ bool SDL_init();
 bool load_files();
 void clean_up();
 void set_clips();
-//void TFT_drawBitmap(int , int , FILE *, TFT *);
+
+int mode = 0;
 
 char* get_IP(const char *iface){
 	
@@ -231,8 +227,11 @@ bool SDL_init()
 
 bool load_files()
 {
-    background = SDL_LoadBMP("background.bmp");;
-    loading = SDL_LoadBMP("loading.bmp");;
+	if(mode == 0)
+		background = SDL_LoadBMP("background2.bmp");
+	else
+		background = SDL_LoadBMP("background.bmp");
+    loading = SDL_LoadBMP("loading.bmp");
     buttonSheet = SDL_LoadBMP( "water.bmp" );
 
     font = TTF_OpenFont( "mvboli.ttf", 12 );
@@ -303,43 +302,40 @@ void rotation(float *x,float *y,float degree)
 
 void OnMessage(sio::event & val)
 {
-	ad[ad_pins_map[0]] = (float)val.get_message()->get_map()["Remaining"]->get_int() 	/ ad_magnification[0];
-	ad[ad_pins_map[1]] = (float)val.get_message()->get_map()["Humidity"]->get_int() 	/ ad_magnification[1];
-	ad[ad_pins_map[2]] = (float)val.get_message()->get_map()["etHumidity"]->get_int() 	/ ad_magnification[2];
-	ad[ad_pins_map[3]] = (float)val.get_message()->get_map()["Temperature"]->get_int()	/ ad_magnification[3];
-	ad[ad_pins_map[4]] = (float)val.get_message()->get_map()["Pressure"]->get_int() 	/ ad_magnification[4];
-}
-/*
-void TFT_drawBitmap(int x, int y, FILE *myFile, TFT *TFTdisp) {
-  if (myFile) {
-    unsigned long w = 0, h = 0;
-    char c = 0, R = 0, G = 0, B = 0;
-	for(int i = 0; i < 18 && c != EOF; i++)
-		c = getc(myFile);
-    for (int i = 0; i < 4 && c != EOF; i++)
-      w += (((c = getc(myFile)) & 0xFF) << (i * 8));
-    for (int i = 0; i < 4 && c != EOF; i++)
-      h += (((c = getc(myFile)) & 0xFF) << (i * 8));
-	for(int i = 0; i < 28 && c != EOF; i++)
-		c = getc(myFile);
+	ad_show[ad_pins_map[0]] = (float)val.get_message()->get_map()["Remaining"]->get_int();
+	ad_show[ad_pins_map[1]] = (float)val.get_message()->get_map()["Humidity"]->get_int();
+	ad_show[ad_pins_map[2]] = (float)val.get_message()->get_map()["etHumidity"]->get_int();
+	ad_show[ad_pins_map[3]] = (float)val.get_message()->get_map()["Temperature"]->get_int();
+	ad_show[ad_pins_map[4]] = (float)val.get_message()->get_map()["Pressure"]->get_double();
+	for(int i = 0; i < 5; i++){
+		if(ad_show[i] > ad_max[i])
+			ad_show[i] = ad_max[i];
+		else if (ad_show[i] < ad_min[i])
+			ad_show[i] = ad_min[i];
 	
-	for (int j = h - 1; j >= 0; j--) {
-      for (int i = 0; i < w; i++){
-		B = getc(myFile);
-		G = getc(myFile);
-		R = getc(myFile);
-		TFTdisp->stroke(R, G, B);
-		TFTdisp->point(x+i, y+j);
-	  }
-      for (int i = 4; i > (w % 4) && (w % 4) != 0; i--)
-        getc(myFile);
-    } 
-  }
+		ad[i] = (ad_show[i] - ad_min[i]) / (ad_max[i] - ad_min[i]);
+	}	
+	
+	if(mode != (int)val.get_message()->get_map()["mode"]->get_int()){
+		mode = (int)val.get_message()->get_map()["mode"]->get_int();
+		SDL_FreeSurface( background );
+		if(mode == 0)
+			background = SDL_LoadBMP("background2.bmp");
+		else
+			background = SDL_LoadBMP("background.bmp");
+	}
+	
+	if(mode == 0 && ad_show[ad_pins_map[4]] != ad_min[ad_pins_map[4]]){
+		ad_show[ad_pins_map[0]] = (1013-(ad_show[ad_pins_map[4]]))*8.6227;
+		if(ad_show[ad_pins_map[0]] <= 0)
+			ad_show[ad_pins_map[0]] = 0;
+		ad[ad_pins_map[0]] = ad_show[ad_pins_map[0]] / 100;
+	}else if(mode == 0){
+		ad_show[ad_pins_map[0]] = 0;
+	}
 }
-*/
 int main( int argc, char* args[] )
 {
-	printf("test");
     int quit = 0;
 
     if( SDL_init() == false )
@@ -366,85 +362,30 @@ int main( int argc, char* args[] )
 		RGBtoBGR(screen);
 		SDL_Flip( screen );
 		usleep(100000);
-		
 	}
 	
-		
 	FILE *fp;
 	char usbwifiID[20];
 	fp = fopen("/tmp/usbwifiID", "r");
 	fscanf(fp, "%s", usbwifiID);
 	fclose(fp);
-    message = TTF_RenderText_Solid( font, get_IP(usbwifiID), (SDL_Color){ 255, 0, 0 } );
 
-	/*
-	TFT TFTscreen = TFT(cs, dc, rst);
-	TFTscreen.begin();
-	TFTscreen.background(0, 0, 0);
-	TFTscreen.fill(255, 0, 0);
-	TFTscreen.stroke(255, 0, 0);
-	TFTscreen.rect(0, 0, 160, 15);
-	TFTscreen.stroke(255, 255, 255);
-	TFTscreen.setTextSize(1);
-	TFTscreen.text(" < 86Duino plant on TFT > ", 0, 3);
-	TFTscreen.fill(0, 0, 255);
-	TFTscreen.stroke(0, 0, 255);
-	TFTscreen.rect(0, 114, 160, 15);
-	TFTscreen.stroke(255, 255, 255);
-	TFTscreen.setTextSize(1);
-	TFTscreen.text(get_IP("wlan3"), 40, 117);
-	FILE *file = fopen("plant3.bmp", "r");
-	TFT_drawBitmap(55, 15, file, &TFTscreen);
-
-	for (int i = 0; i < 4; i++) {
-		TFTscreen.stroke(0, 255, 0);
-		TFTscreen.text(TFT_name[i], 5 , 16 + i * 25);
-		TFTscreen.text(TFT_unit[i], 70 , 30 + i * 25);
-	}
-	char buffer[10];
-	*/
     while( !quit )
     {		
-
-/*
-		TFT_val[0] = ad[0]* ad_magnification[0];
-		TFT_val[1] = ad[2]* ad_magnification[2];
-		TFT_val[2] = ad[3]* ad_magnification[3];
-		TFT_val[3] = ad[4]* ad_magnification[4];
-		
-		TFTscreen.setTextSize(2);
-		for (int i = 0; i < 4; i++) {
-			if(TFT_val[i] == TFT_rval[i])
-				continue;
-			sprintf(buffer, "% 5d", TFT_rval[i]);
-			TFTscreen.stroke(0, 0, 0);
-			TFTscreen.text(buffer, 5 , 24 + i * 25);
-		}
-		for (int i = 0; i < 4; i++) {
-			sprintf(buffer, "% 5d", TFT_val[i]);
-			TFTscreen.stroke(0, 255, 0);
-			TFTscreen.text(buffer, 5 , 24 + i * 25);
-		}
-		
-		TFT_rval[0] = ad[0]* ad_magnification[0];
-		TFT_rval[1] = ad[2]* ad_magnification[2];
-		TFT_rval[2] = ad[3]* ad_magnification[3];
-		TFT_rval[3] = ad[4]* ad_magnification[4];
-*/
-
-
-
 		//keyshift
 		/*
 		char shift[10];
 		sprintf(shift,"%d",keyshift_x);
 		ad_msg = TTF_RenderText_Solid( font, shift, textColor );
-		apply_surface(10,50, ad_msg, screen );
+		apply_surface(10, 50, ad_msg, screen );
 		
 		sprintf(shift,"%d",keyshift_y);
 		ad_msg = TTF_RenderText_Solid( font, shift, textColor );
 		apply_surface(30,50, ad_msg, screen );
 		*/
+		
+		
+		message = TTF_RenderText_Solid( font, get_IP(usbwifiID), (SDL_Color){ 255, 0, 0 } );
         apply_surface( 0, 0, background, screen );
 		apply_surface( 215, 225, message, screen );
         myButton.show();
@@ -454,14 +395,10 @@ int main( int argc, char* args[] )
 		/*
 		for(int i = 0; i < 5; i++)
 			ad[ad_pins_map[i]] = (float)analogRead(A0+i)/1024;
-		
 		*/
 		socketio.socket()->on("update", &OnMessage);
 		
-		
-		
 		for(int i = 0; i < 5; i++){
-	
 			float x = 0,y = 78;
 			float x2 = 0,y2 = 88;
 			float avg1,avg2;
@@ -472,31 +409,49 @@ int main( int argc, char* args[] )
 			avg2 = i!=4 ? (ad[i]+ad[i+1])/4 : (ad[0]+ad[4])/4;
 			
 			rotation(&x2,&y2,-180-72*i-36);
-			sprintf(s,"%d",(int)(ad[i] * ad_magnification[i]));
-			ad_msg = TTF_RenderText_Solid( font, s, (SDL_Color){ 255, 64, 64 } );
-			apply_surface((x2*ad[i]) +homex -9,(y2*ad[i]) +homey  -4, ad_msg, screen );
-			
-						
-			rotation(&x,&y,-180-72*i);
-			output_x[0] = (x*avg1) + homex;
-			output_y[0] = (y*avg1) + homey;
-			rotation(&x,&y,-36);
-			output_x[1] = (x*ad[i]) + homex;
-			output_y[1] = (y*ad[i]) + homey;
-			rotation(&x,&y,-36);
-			output_x[2] = (x*avg2) + homex;
-			output_y[2] = (y*avg2) + homey;
-			
-			output_x[3] = homex;
-			output_y[3] = homey;
 
-			filledPolygonRGBA(	screen, 
-								output_x, output_y,
-								4,
-								(1.0-(float)ad[i])*255, (float)ad[i]*255, 0, 128);
-			
+			sprintf(s,"%d",(int)(ad_show[i]));
+			if((int)(ad_show[i]) != 0){
+				ad_msg = TTF_RenderText_Solid( font, s, (SDL_Color){ 255, 64, 64 } );
+				apply_surface((x2*ad[i]) +homex -9,(y2*ad[i]) +homey  -4, ad_msg, screen );
+
+				rotation(&x,&y,-180-72*i);
+				output_x[0] = (x*avg1) + homex;
+				output_y[0] = (y*avg1) + homey;
+				rotation(&x,&y,-36);
+				output_x[1] = (x*ad[i]) + homex;
+				output_y[1] = (y*ad[i]) + homey;
+				rotation(&x,&y,-36);
+				output_x[2] = (x*avg2) + homex;
+				output_y[2] = (y*avg2) + homey;
+				
+				output_x[3] = homex;
+				output_y[3] = homey;
+
+				filledPolygonRGBA(	screen, 
+									output_x, output_y,
+									4,
+									(1.0-(float)ad[i])*255, (float)ad[i]*255, 0, 128);
+			}else{
+				rotation(&x,&y,-180-72*i);
+				output_x[0] = (x*avg1) + homex;
+				output_y[0] = (y*avg1) + homey;
+				rotation(&x,&y,-36);
+				output_x[1] = (x) + homex;
+				output_y[1] = (y) + homey;
+				rotation(&x,&y,-36);
+				output_x[2] = (x*avg2) + homex;
+				output_y[2] = (y*avg2) + homey;
+				
+				output_x[3] = homex;
+				output_y[3] = homey;
+
+				filledPolygonRGBA(	screen, 
+									output_x, output_y,
+									4,
+									0, 255, 0, 128);
+			}
 		}
-		
         while(SDL_PollEvent(&event))
         {
             if (event.type == SDL_QUIT)
@@ -508,18 +463,16 @@ int main( int argc, char* args[] )
             myButton.handle_events();
         }
 		
-		RGBtoBGR(screen);
+		RGBtoBGR( screen );
 		SDL_Flip( screen );
-		
-		
 		
 		usleep(500000);
 		
     }
-
     clean_up();
-
     return 0;
 }
+
+
 
 
